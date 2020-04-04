@@ -19,8 +19,8 @@ void setup(){
   Wire.begin();
   rtc.begin();
   SD.begin(chipSelect);
-  int result = bioHub.begin();
-  int error = bioHub.configBpm(MODE_TWO); 
+  bioHub.begin();
+  bioHub.configBpm(MODE_TWO); 
 
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); 
   display.clearDisplay();
@@ -30,10 +30,10 @@ void setup(){
   display.setCursor(0,0);
  
   display.println("PulseOxRecorder"); 
-  display.print("Version: 0.03 ");
+  display.print("Version: 0.1 ");
   display.display();
 
-  delay(4000);
+  delay(2000);
 }
 
 void loop(){
@@ -41,6 +41,59 @@ void loop(){
     DateTime now = rtc.now();
     sensor = bioHub.readBpm();
 
+    display.clearDisplay();
+    display.setCursor(0, 5);
+    display.print("BPM:");
+    display.setCursor(55, 5);
+    display.print("S02:");
+    display.setCursor(25, 0);
+    display.setTextSize(2);
+    display.print(sensor.heartRate);
+    display.setCursor(80, 0);
+    display.print(sensor.oxygen);
+    display.setTextSize(1);
+    display.println("%");
+    display.setCursor(0, 18);
+    switch (int(sensor.extStatus))
+    {
+      case 0:	 display.print("Confidence: ");
+               display.print(sensor.confidence);
+               display.print(" %");
+        break;
+      case -1:	display.print("Object Detected");
+        break;
+      case 1:	display.print("Not Ready");
+        break;
+      case -2:	display.print("Excessive sensor motion");
+        break;
+      case -3:	display.print("No Object Detected");
+        break;
+      case -4:	display.print("Pressing too hard");
+        break;
+      case -5:	display.print("That's not a \n finger, pervert!");
+        break;
+      case -6:	display.print("Excessive finger motion");
+        break;
+    }
+  display.println();
+  if (sensor.confidence > 80) {
+    File dataFile = SD.open("pulseox.csv", FILE_WRITE);
+      if (dataFile) {
+        dataFile.print(now.unixtime()); 
+        dataFile.print(", ");
+        dataFile.print(sensor.heartRate);
+        dataFile.print(", ");
+        dataFile.print(sensor.oxygen); 
+        dataFile.print(", ");
+        dataFile.print(sensor.confidence);
+        dataFile.println(); 
+        display.print("writing to SD");
+        dataFile.close();
+      }
+  }
+    display.display();
+
+  if (Serial) {
     Serial.print(now.unixtime());
     Serial.print(" ");
     Serial.print(sensor.extStatus); 
@@ -49,39 +102,12 @@ void loop(){
     Serial.print(" ");
     Serial.print(sensor.oxygen); 
     Serial.print(" ");
-    Serial.println(sensor.confidence); 
+    Serial.print(sensor.confidence); 
 
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("Pulse: ");
-    display.print(sensor.heartRate);
-    display.println(" bpm");
-    display.print("SO2: ");
-    display.print(sensor.oxygen);
-    display.println(" %");
-
-    display.println();    
-    display.print("Status: ");
-    display.print(sensor.extStatus);
-    display.print(" conf: ");
-    display.print(sensor.confidence);
-    display.println(" %");
-   
-    display.display();
-
-
-  File dataFile = SD.open("pulseox.csv", FILE_WRITE);
-
-  if (dataFile and sensor.extStatus == 0) {
-    dataFile.print(now.unixtime()); 
-    dataFile.print(", ");
-    dataFile.print(sensor.heartRate);
-    dataFile.print(", ");
-    dataFile.print(sensor.oxygen); 
-    dataFile.print(", ");
-    dataFile.print(sensor.confidence);
-    dataFile.println(); 
-    dataFile.close();
+    Serial.print(" status code: "); 
+    Serial.print(sensor.extStatus); 
+    Serial.println();
   }
+
     delay(1000); 
 }
