@@ -3,14 +3,15 @@
 #include "RTClib.h"
 #include <SD.h>
 #include <SPI.h>
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-const int resPin = 4;
-const int mfioPin = 5;
-const int chipSelect = 6;
 
-SparkFun_Bio_Sensor_Hub bioHub(resPin, mfioPin); 
+#define CHIPSELECT A1
+#define RES_PIN A2
+#define MFIO_PIN A3
+
+
+SparkFun_Bio_Sensor_Hub bioHub(RES_PIN, MFIO_PIN); 
 bioData sensor;  
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 RTC_DS3231 rtc;
@@ -18,7 +19,7 @@ RTC_DS3231 rtc;
 void setup(){
   Wire.begin();
   rtc.begin();
-  SD.begin(chipSelect);
+  SD.begin(CHIPSELECT);
   bioHub.begin();
   bioHub.configBpm(MODE_TWO); 
 
@@ -30,10 +31,10 @@ void setup(){
   display.setCursor(0,0);
  
   display.println("PulseOxRecorder"); 
-  display.print("Version: 0.1 ");
+  display.print("Version: 0.3 ");
   display.display();
 
-  delay(2000);
+  delay(900);
 }
 
 void loop(){
