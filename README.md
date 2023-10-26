@@ -3,10 +3,10 @@ arduino pulseox logger. this could be used overnight to capture sleep apnea even
 
 Using:
 - SparkFun Pulse Oximeter and Heart Rate Monitor
-- QT PY (Cortex M0+)
+- QT PY (Cortex M0+) -> Feather express M0
 - SSD1306 display
-- DS3231 rtc
-- SD card
+- DS3231 rtc (works without, non logging)
+- SD card (works without, non logging)
 
 ![](https://raw.githubusercontent.com/ssk8/simple_pulseox_logger/master/IMG_20200321_171021721%7E2.jpg)
 
